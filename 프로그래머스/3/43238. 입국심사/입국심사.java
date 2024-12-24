@@ -17,9 +17,9 @@ class Solution {
             
             if(sum < n) { 
                 left = mid + 1; 
-            } else { 
-                right = mid - 1;
+            } else {
                 answer = mid;
+                right = mid - 1;
             }
         }
         return answer;
