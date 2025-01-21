@@ -5,26 +5,10 @@ import java.io.*;
 class Main {
     static int R, C;
     static char[][] map;
-    static boolean[][] visited;
-    static List<Item> fire;
-    static Queue<Item> q;
+    static Queue<int[]> fire;
+    static Queue<int[]> man;
     static int[] dx = {-1, 1, 0, 0};
     static int[] dy = {0, 0, -1, 1};
-    static int answer;
-
-    static class Item {
-        char type;
-        int x;
-        int y;
-        int cnt;
-
-        public Item(char type, int x, int y, int cnt) {
-            this.type = type;
-            this.x = x;
-            this.y = y;
-            this.cnt = cnt;
-        }
-    }
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -32,68 +16,81 @@ class Main {
         R = Integer.parseInt(input[0]);
         C = Integer.parseInt(input[1]);
 
-        map = new char[R+1][C+1]; 
-        visited = new boolean[R+1][C+1];
-        q = new LinkedList<>();
-        fire = new ArrayList<>();
+        map = new char[R][C]; 
+        fire = new LinkedList<>();
+        man = new LinkedList<>();
 
         for(int i = 0; i < R; i++) {
-            String s = br.readLine();
+            map[i] = br.readLine().toCharArray();
             for(int j = 0; j < C; j++) {
-                map[i][j] = s.charAt(j);
                 if(map[i][j] == 'J') {
-                    q.add(new Item('J', i, j, 0));
-                    visited[i][j] = true;
+                    man.add(new int[]{i, j});
                 }
                 if(map[i][j] == 'F') {
-                    fire.add(new Item('F', i, j, 0));
+                    fire.add(new int[]{i, j});
                 }
             }
         }
 
-        for(Item item : fire) {
-            q.add(item);
+        int time = 0;
+        boolean isMove = true;
+        
+        while(!man.isEmpty()) {
+            time++;
+            fireMove();
+
+            if(manMove()) {
+                System.out.print(time);
+                return;
+            }
         }
 
-
-        bfs();
-
-        System.out.print(answer > 0 ? answer : "IMPOSSIBLE");
+        System.out.print("IMPOSSIBLE");
     }
 
-    private static void bfs() {
+    private static void fireMove() {
+        int size = fire.size();
 
-        while(!q.isEmpty()) {
-            Item now = q.poll();
+        for(int i = 0; i < size; i++) {
+            int[] now = fire.poll();
 
-            if(now.type == 'J' && map[now.x][now.y] == 'F') {
-                continue;
-            }
+            for(int j = 0; j < 4; j++) {
+                int nx = now[0] + dx[j];
+                int ny = now[1] + dy[j];
 
-            for(int i = 0; i < 4; i++) {
-                int nx = now.x + dx[i];
-                int ny = now.y + dy[i];
+                if(!inRange(nx, ny)) continue;
 
-                if(!inRange(nx, ny)) {
-                    if(now.type == 'F') continue;
-                    answer = now.cnt + 1;
-                    return;
-                }
-
-                if(map[nx][ny] == '#' || map[nx][ny] == 'F') continue;
-                
-                if(now.type == 'J' && !visited[nx][ny]) {
-                    q.add(new Item('J', nx, ny, now.cnt + 1));
-                    visited[nx][ny] = true;
-                }
-
-                if(now.type == 'F') {
-                    q.add(new Item('F', nx, ny, 0));
+                if(map[nx][ny] == 'J' || map[nx][ny] == '.') {
+                    fire.add(new int[]{nx, ny});
                     map[nx][ny] = 'F';
                 }
 
             }
         }
+    }
+
+    private static boolean manMove() {
+        int size = man.size();
+
+        for(int i = 0; i < size; i++) {
+            int[] now = man.poll();
+
+            for(int j = 0; j < 4; j++) {
+                int nx = now[0] + dx[j];
+                int ny = now[1] + dy[j];
+
+                if(!inRange(nx, ny)) {
+                    return true;
+                }
+
+                if(map[nx][ny] == '.') {
+                    man.add(new int[]{nx, ny});
+                    map[nx][ny] = 'J';
+                }
+                
+            }
+        }
+        return false;
     }
 
     private static boolean inRange(int x, int y) {
