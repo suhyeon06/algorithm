@@ -33,9 +33,7 @@ class Main {
             }
         }
 
-        for(int i = 1; i <= N; i++) {
-            dfs(0, i, 0);
-        }
+        dfs(0, 0, 0, 0, 0, 0);
 
         Collections.sort(list);
 
@@ -54,69 +52,31 @@ class Main {
     }
 
 
-    static void dfs(int depth, int target, int start) {
-        if(depth == target) {
-            check();
+    static void dfs(int depth, int sumP, int sumF, int sumS, int sumV, int sumCost) {
+
+        if(sumCost > minCost) {
             return;
         }
 
-        for(int i = start; i < N; i++) {
-            select[i] = true;
-            dfs(depth + 1, target, i + 1);
-            select[i] = false;
-        }
-    }
+        if(sumP >= mp && sumF >= mf && sumS >= ms && sumV >= mv && sumCost < minCost) {
+            minCost = sumCost;
 
-    static void check() {
-        int[] sum = new int[SIZE];
+            list = new ArrayList<>();
 
-        for(int i = 0; i < select.length; i++) {
-            if(select[i]) {
-                for(int j = 0; j < SIZE; j++) {
-                    sum[j] += arr[i][j];
+            for(int i = 0; i < select.length; i++) {
+                if(select[i]) {
+                    list.add(i + 1);
                 }
             }
         }
 
-        if(sum[0] >= mp && sum[1] >= mf && sum[2] >= ms && sum[3] >= mv) {
-            
-            if(sum[4] < minCost) {
-                minCost = sum[4];
-            
-                list.clear();
-                for(int i = 0; i < select.length; i++) {
-                    if(select[i]) {
-                        list.add(i + 1);
-                    }
-                }
-            } else if(sum[4] == minCost) {
-                Collections.sort(list);
-
-                sb = new StringBuilder();
-                for(int num : list) {
-                    sb.append(num);
-                }
-        
-                String a = sb.toString();
-                String b = "";
-
-                for(int i = 0; i < select.length; i++) {
-                    if(select[i]) {
-                        b += (i + 1) + "";
-                    }
-                }
-
-                if(a.compareTo(b) > 0) {
-                    list.clear();
-                    for(int i = 0; i < select.length; i++) {
-                        if(select[i]) {
-                            list.add(i + 1);
-                        }
-                    }
-                }
-                
-            }
-
+        if(depth >= N) {
+            return;
         }
+
+        select[depth] = true;
+        dfs(depth + 1, sumP + arr[depth][0], sumF + arr[depth][1], sumS + arr[depth][2], sumV + arr[depth][3], sumCost + arr[depth][4]);
+        select[depth] = false;
+        dfs(depth + 1, sumP, sumF, sumS, sumV, sumCost);
     }
 }
